@@ -28,3 +28,6 @@ class Pokemon(models.Model):
     ev_defense = models.IntegerField(default=20)
     ev_special_defense = models.IntegerField(default=20)
     ev_speed = models.IntegerField(default=20)
+
+    def __str__(self):
+        return self.species.name

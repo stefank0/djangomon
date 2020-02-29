@@ -8,3 +8,6 @@ class Move(models.Model):
     power = models.IntegerField()
     accuracy = models.FloatField()
     type = models.ForeignKey(Type, models.PROTECT)
+
+    def __str__(self):
+        return self.name
