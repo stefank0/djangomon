@@ -18,3 +18,10 @@ class PokemonSpecies(models.Model):
 
     def __str__(self):
         return self.name
+
+    def effectiveness(self, type):
+        """Effectiveness of a Type against this PokemonSpecies."""
+        effectiveness = type.effectiveness(self.type1)
+        if self.type2:
+            effectiveness *= type.effectiveness(self.type2)
+        return effectiveness

@@ -1,3 +1,5 @@
+from math import floor
+
 from django.db import models
 
 from .nature import Nature
@@ -31,3 +33,34 @@ class Pokemon(models.Model):
 
     def __str__(self):
         return self.species.name
+
+    def _stat(self, stat_name):
+        iv = getattr(self, 'iv_' + stat_name)
+        ev = getattr(self, 'ev_' + stat_name)
+        base_stat = getattr(self.species, stat_name)
+        stat = (((2*base_stat + iv + ev//4) * self.level) // 100) + 5
+        return floor(stat * self.nature.modifier(stat_name))
+
+    @property
+    def hp(self):
+        return self._stat('hp') + 5 + self.level
+
+    @property
+    def attack(self):
+        return self._stat('attack')
+
+    @property
+    def special_attack(self):
+        return self._stat('special_attack')
+
+    @property
+    def defense(self):
+        return self._stat('defense')
+
+    @property
+    def special_defense(self):
+        return self._stat('special_defense')
+
+    @property
+    def speed(self):
+        return self._stat('speed')

@@ -6,3 +6,7 @@ class Type(models.Model):
 
     def __str__(self):
         return self.name
+
+    def effectiveness(self, other):
+        """Effectiveness when attacking another Type."""
+        return 1.0
