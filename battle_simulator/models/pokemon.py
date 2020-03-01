@@ -4,12 +4,12 @@ from django.db import models
 
 from .nature import Nature
 from .ability import Ability
-from .pokemon_species import PokemonSpecies
+from .species import Species
 from .move import Move
 
 
 class Pokemon(models.Model):
-    species = models.ForeignKey(PokemonSpecies, models.PROTECT)
+    species = models.ForeignKey(Species, models.PROTECT)
     level = models.IntegerField(default=50)
     nature = models.ForeignKey(Nature, models.PROTECT)
     ability = models.ForeignKey(Ability, models.PROTECT)
@@ -30,6 +30,9 @@ class Pokemon(models.Model):
     ev_defense = models.IntegerField(default=20)
     ev_special_defense = models.IntegerField(default=20)
     ev_speed = models.IntegerField(default=20)
+
+    class Meta:
+        verbose_name_plural = 'pokemon'
 
     def __str__(self):
         return self.species.name

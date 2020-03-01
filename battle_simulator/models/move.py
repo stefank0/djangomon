@@ -14,10 +14,8 @@ class Move(models.Model):
 
     def stab(self, attacker):
         """Same type attack bonus (STAB)."""
-        if (self.type == attacker.species.type1) or (self.type == attacker.species.type2):
-            return 1.5
-        else:
-            return 1.0
+        types = [attacker.species.type1, attacker.species.type2]
+        return 1.5 if (self.type in types) else 1.0
 
     def damage(self, attacker, defender):
         stab = self.stab(attacker)

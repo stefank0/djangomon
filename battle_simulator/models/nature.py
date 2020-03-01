@@ -17,8 +17,5 @@ class Nature(models.Model):
         return self.name
 
     def modifier(self, stat):
-        modifiers = {
-            self.increased_stat: 1.1,
-            self.decreased_stat: 0.9
-        }
+        modifiers = {self.increased_stat: 1.1, self.decreased_stat: 0.9}
         return modifiers.get(stat, 1)
