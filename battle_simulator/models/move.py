@@ -6,8 +6,18 @@ from .type import Type
 class Move(models.Model):
     name = models.CharField(max_length=16)
     power = models.IntegerField()
+    priority = models.IntegerField()
+    pp = models.IntegerField()
     accuracy = models.FloatField()
     type = models.ForeignKey(Type, models.PROTECT)
+    # stat_changes
+
+    class DamageClass(models.TextChoices):
+        PHYSICAL = 'PH', 'Physical'
+        SPECIAL = 'SP', 'Special'
+        STATUS = 'ST', 'Status'
+
+    damage_class = models.CharField(max_length=2, choices=DamageClass.choices)
 
     def __str__(self):
         return self.name
