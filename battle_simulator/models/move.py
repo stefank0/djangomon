@@ -27,6 +27,22 @@ class Move(models.Model):
         types = [attacker.species.type1, attacker.species.type2]
         return 1.5 if (self.type in types) else 1.0
 
-    def damage(self, attacker, defender):
+    def damage_expected(self, attacker, defender):
+        """Expectation value of the damage."""
+        return self.damage_value(attacker, defender) * self.accuracy
+
+    def damage_value(self, attacker, defender):
+        """Damage when the attacker hits the defender."""
+        if self.damage_class == 'Physical':
+            stat_factor = attacker.attack / defender.defense
+        else:
+            stat_factor = attacker.special_attack / defender.special_defense
+        level_factor = 2.0 * attacker.level / 5.0 + 2.0
+        base_damage = (self.power * level_factor * stat_factor) / 50.0 + 2.0
         stab = self.stab(attacker)
         effectiveness = defender.species.effectiveness(self.type)
+        return base_damage * stab * effectiveness
+
+    def damage(self, attacker, defender):
+        """Actual damage when used by an attacker against a defender."""
+        return self.damage_value(attacker, defender)                            # TODO: Use accuracy and randomness.

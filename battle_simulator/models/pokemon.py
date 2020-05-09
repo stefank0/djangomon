@@ -67,3 +67,24 @@ class Pokemon(models.Model):
     @property
     def speed(self):
         return self._stat('speed')
+
+    def pick_move(self, other):
+        """Pick the best move against another Pokemon."""
+        return max(
+            self.moves.all(),
+            key=lambda move: move.damage_expected(self, other)
+        )
+
+    def battle(self, other):
+        """Battle with another Pokemon. The winner is returned."""
+        self.current_hp = self.hp
+        other.current_hp = other.hp
+        first = max([self, other], key=lambda pokemon: pokemon.speed)
+        second = self if (first == other) else other
+        while True:
+            second.current_hp -= first.pick_move(second).damage(first, second)
+            if second.current_hp <= 0:
+                return first
+            first.current_hp -= second.pick_move(first).damage(second, first)
+            if first.current_hp <= 0:
+                return second
