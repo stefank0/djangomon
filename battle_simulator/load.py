@@ -114,3 +114,10 @@ def load_pokemon():
         for move in pb.pokemon(species.name).moves:
             move_name = move.move.name
             pokemon.moves.add(Move.objects.get(name=move_name))
+
+
+def battle_sim1():
+    """First battle 'version'"""
+    for pokemon1 in Pokemon.objects.all():
+        for pokemon2 in Pokemon.objects.all():
+            print(pokemon1.species.name, pokemon2.species.name, pokemon1.battle(pokemon2))

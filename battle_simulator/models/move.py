@@ -33,7 +33,7 @@ class Move(models.Model):
 
     def damage_value(self, attacker, defender):
         """Damage when the attacker hits the defender."""
-        if self.damage_class == 'Physical':
+        if self.damage_class == 'PH':
             stat_factor = attacker.attack / defender.defense
         else:
             stat_factor = attacker.special_attack / defender.special_defense

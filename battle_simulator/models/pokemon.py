@@ -80,11 +80,19 @@ class Pokemon(models.Model):
         self.current_hp = self.hp
         other.current_hp = other.hp
         first = max([self, other], key=lambda pokemon: pokemon.speed)
-        second = self if (first == other) else other
+        second = self if (first is other) else other
         while True:
-            second.current_hp -= first.pick_move(second).damage(first, second)
+            move = first.pick_move(second)
+            damage = move.damage(first, second)
+            print(first.current_hp, second.current_hp)
+            print(first.species.name, move.name, damage)
+            second.current_hp -= damage
             if second.current_hp <= 0:
                 return first
-            first.current_hp -= second.pick_move(first).damage(second, first)
+            move = second.pick_move(first)
+            damage = move.damage(second, first)
+            print(first.current_hp, second.current_hp)
+            print(second.species.name, move.name, damage)
+            first.current_hp -= damage
             if first.current_hp <= 0:
                 return second
