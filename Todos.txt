@@ -1,0 +1,34 @@
+Doel 1: inzicht te krijgen in welke Pokemon goed zijn (die geen items nodig hebben) afhankelijk van hun learnset (geen TMs, geen breeding, geen HMs)
+Doel 2: hetzelfde als hierboven maar dan met TMs en HMs
+Middel: Een battle simulator maken voor Pokemon / Pixelmon
+
+Conditions:
+1: IVs worden op gemiddeld gezet (0 tot 31 --> 15)
+2: EVs worden op random trainen gezet (5 statpoint = 20 EVs; in total 255)
+3: Natures (neutral)
+4: Op LVL 50
+5: Pokemon gedraagt zich als een gewone Pokemon speler; maximum dmg
+6: Priority moves implementeren (zoals een quick attack om de tegenstander uit te schakelen) en voorlopig geen status move
+    -For loop / looping over de priority moves om de tegenstander te killen
+    -Andere loop over alles om de move te kiezen voor max dmg
+7: Type modifier
+8: Hit chance (later inbrengen)
+    -In eerste instantie geen hit chance; alles raakt dus dat is makkelijker te implementeren
+    -In tweede instantie hit chance voor beide Pokemon (random number: raak of niet raak en dan het gevecht aantal keren runnen)
+9: AI kiest de attacks met meeste dmg (kijkt ook naar de type) en doet priority moves als ie de battle daarmee kan winnen
+
+Battleverloop:
+1: 10 gevechten per Pokemon (1 keuze tegen alle andere Pokemons)
+2: Iedere winst betekent 1 punt)
+3: Schaal is 0 tot 10 punten die een Pokemon kan scoren
+4: Wegschrijven naar een file / database waarbij de scores worden bijgehouden van een gevecht
+
+Turn 1
+1: Attack moves zijn duidelijk
+2: Dan de snelheid van beide Pokemon
+3: HP bijhouden
+
+Stappenplan:
+1: Als eerste type modifier:
+    -Same type modifier (1,5x)
+    -Different type modifier (1,0 of 0,5x afhankelijk van weakness of niet)

@@ -1,5 +1,5 @@
 import pokebase as pb
-from battle_simulator.models import Nature, Type, Species
+from battle_simulator.models import Nature, Type, Species, Ability, Move, Pokemon
 
 
 def get_all(attr):
@@ -74,4 +74,43 @@ def load_species():
             type2 = Type.objects.get(name=pokemon.types[1].type.name)
         else:
             type2 = None
-        Species.objects.create(name=name, type1=type1, type2=type2, hp=hp, attack=attack, defense=defense, special_attack=special_attack, special_defense=special_defense, speed=speed)
+        Species.objects.create(name=name, type1=type1, type2=type2, hp=hp, attack=attack, defense=defense,
+                               special_attack=special_attack, special_defense=special_defense, speed=speed)
+
+
+def load_abilities():
+    """Load all abilities from Pokemon API into our own DB."""
+    for ability in get_all('ability'):
+        name = ability.name
+        Ability.objects.create(name=name)
+
+
+def load_moves():
+    """Load all moves from Pokemoon API into our own DB."""
+    for move in get_all('move'):
+        name = move.name
+        power = move.power
+        if power is None:
+            power = 0
+        priority = move.priority
+        """Accuracy needs to be modified but for now okay because it Null is different from 100. Can be influenced"""
+        accuracy = move.accuracy
+        if accuracy is None:
+            accuracy = 100
+        pp = move.pp
+        type_ = Type.objects.get(name=move.type.name)
+        damage_classes = {'physical': 'PH', 'special': 'SP', 'status': 'ST'}
+        damage_class = damage_classes[move.damage_class.name]
+        Move.objects.create(name=name, power=power, priority=priority,
+                            accuracy=accuracy, pp=pp, type=type_, damage_class=damage_class)
+
+
+def load_pokemon():
+    """Load unique Pokemon creatures for the battle simulator """
+    ability = Ability.objects.first()
+    nature = Nature.objects.get(name='quirky')
+    for species in Species.objects.all():
+        pokemon = Pokemon.objects.create(species=species, ability=ability, nature=nature)
+        for move in pb.pokemon(species.name).moves:
+            move_name = move.move.name
+            pokemon.moves.add(Move.objects.get(name=move_name))
