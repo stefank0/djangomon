@@ -1,5 +1,5 @@
 import pokebase as pb
-from pokemon.models import Nature, Type, Species, Ability, Move, Pokemon
+from pokemon.models import Nature, Type, Species, Ability, Move, Pokemon, BattleLog
 
 
 def get_all(attr):
@@ -104,6 +104,14 @@ def load_moves():
         Move.objects.create(name=name, power=power, priority=priority,
                             accuracy=accuracy, pp=pp, type=type_, damage_class=damage_class)
 
+def is_selected(move):
+    """Load Pokemon moves based on its learnset"""
+    for details in move.version_group_details:
+        if details['version_group']['name'] == 'ultra-sun-ultra-moon':
+            if details['move_learn_method']['name'] == 'level-up':
+                if details['level_learned_at'] < 60:
+                    return True
+    return False
 
 def load_pokemon():
     """Load unique Pokemon creatures for the battle simulator """
@@ -112,12 +120,15 @@ def load_pokemon():
     for species in Species.objects.all():
         pokemon = Pokemon.objects.create(species=species, ability=ability, nature=nature)
         for move in pb.pokemon(species.name).moves:
-            move_name = move.move.name
-            pokemon.moves.add(Move.objects.get(name=move_name))
+            if is_selected(move):
+                move_name = move.move.name
+                pokemon.moves.add(Move.objects.get(name=move_name))
 
 
 def battle_sim1():
     """First battle 'version'"""
     for pokemon1 in Pokemon.objects.all():
         for pokemon2 in Pokemon.objects.all():
-            print(pokemon1.species.name, pokemon2.species.name, pokemon1.battle(pokemon2))
+            winner, report = pokemon1.battle(pokemon2)
+            loser = pokemon1 if winner is pokemon2 else pokemon2
+            BattleLog.objects.create(winner=winner, loser=loser, report=report)
