@@ -77,22 +77,26 @@ class Pokemon(models.Model):
 
     def battle(self, other):
         """Battle with another Pokemon. The winner is returned."""
+        report = 'Generation = Ultra Sun / Ultra Moon \n'
         self.current_hp = self.hp
         other.current_hp = other.hp
         first = max([self, other], key=lambda pokemon: pokemon.speed)
         second = self if (first is other) else other
+        report += '{} at {} vs {} at {} \n'.format(first.species.name, first.level, second.species.name, second.level)
         while True:
             move = first.pick_move(second)
             damage = move.damage(first, second)
-            print(first.current_hp, second.current_hp)
-            print(first.species.name, move.name, damage)
+            report += '{}:{} vs {}:{}, \n'.format(first.species.name, first.current_hp, second.species.name, second.current_hp)
+            report += '{} does {}({}) with {} damage \n'.format(first.species.name, move.name, move.damage_class, damage)
             second.current_hp -= damage
             if second.current_hp <= 0:
-                return first
+                report += '{} is a winner with {}% HP left.'.format(first.species.name, round((first.current_hp / first.hp)*100), 2)
+                return first, report
             move = second.pick_move(first)
             damage = move.damage(second, first)
-            print(first.current_hp, second.current_hp)
-            print(second.species.name, move.name, damage)
+            report += '{}:{} vs {}:{}, \n'.format(first.species.name, first.current_hp, second.species.name, second.current_hp)
+            report += '{} does {}({}) with {} damage \n'.format(second.species.name, move.name, move.damage_class, damage)
             first.current_hp -= damage
             if first.current_hp <= 0:
-                return second
+                report += '{} is a winner with {}% HP left.'.format(second.species.name, round((second.current_hp / second.hp)*100), 2)
+                return second, report

@@ -4,3 +4,4 @@ from .nature import Nature
 from .ability import Ability
 from .species import Species
 from .pokemon import Pokemon
+from .battle_log import BattleLog
