@@ -1,5 +1,5 @@
 import pokebase as pb
-from battle_simulator.models import Nature, Type, Species, Ability, Move, Pokemon
+from pokemon.models import Nature, Type, Species, Ability, Move, Pokemon
 
 
 def get_all(attr):
