@@ -4,7 +4,7 @@ from pokemon.models import Pokemon
 
 def battle():
     """Run the Pokemon battle simulator."""
-    pokemons = Pokemon.objects.filter(id__lte=386)  # up to 3rd gen only
+    pokemons = Pokemon.objects.filter(species__id__lte=386)  # up to 3rd gen only
     for pokemon1 in pokemons:
         for pokemon2 in pokemons:
             if pokemon1 != pokemon2:
