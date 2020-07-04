@@ -1,4 +1,5 @@
 from math import floor
+import random
 
 from django.db import models
 
@@ -75,28 +76,41 @@ class Pokemon(models.Model):
             key=lambda move: move.damage_expected(self, other)
         )
 
+    @staticmethod
+    def _move_order(pokemon1, move1, pokemon2, move2):
+        """The order in which the moves are performed."""
+        order1 = ((pokemon1, move1, pokemon2), (pokemon2, move2, pokemon1))
+        order2 = reversed(order1)
+        if move1.priority > move2.priority:
+            return order1
+        elif move2.priority > move1.priority:
+            return order2
+        else:
+            if pokemon1.speed > pokemon2.speed:
+                return order1
+            elif pokemon2.speed > pokemon1.speed:
+                return order2
+            else:
+                return random.choice((order1, order2))
+
+    def use_move(self, move, other, battle_report):
+        """Use a move against another Pokemon."""
+        damage = move.damage(self, other)
+        other.current_hp = max(other.current_hp - damage, 0)
+        battle_report += f'{self} uses {move} with {damage} {move.damage_class} damage.\n'
+        battle_report += f'HP left: {self} ({self.current_hp}) and {other} ({other.current_hp}).\n'
+
     def battle(self, other):
         """Battle with another Pokemon. The winner is returned."""
-        report = 'Generation = Ultra Sun / Ultra Moon \n'
         self.current_hp = self.hp
         other.current_hp = other.hp
-        first = max([self, other], key=lambda pokemon: pokemon.speed)
-        second = self if (first is other) else other
-        report += '{} at {} vs {} at {} \n'.format(first.species.name, first.level, second.species.name, second.level)
+        battle_report = f'{self} vs {other}\n'
         while True:
-            move = first.pick_move(second)
-            damage = move.damage(first, second)
-            report += '{}:{} vs {}:{}, \n'.format(first.species.name, first.current_hp, second.species.name, second.current_hp)
-            report += '{} does {}({}) with {} damage \n'.format(first.species.name, move.name, move.damage_class, damage)
-            second.current_hp -= damage
-            if second.current_hp <= 0:
-                report += '{} is a winner with {}% HP left.'.format(first.species.name, round((first.current_hp / first.hp)*100), 2)
-                return first, report
-            move = second.pick_move(first)
-            damage = move.damage(second, first)
-            report += '{}:{} vs {}:{}, \n'.format(first.species.name, first.current_hp, second.species.name, second.current_hp)
-            report += '{} does {}({}) with {} damage \n'.format(second.species.name, move.name, move.damage_class, damage)
-            first.current_hp -= damage
-            if first.current_hp <= 0:
-                report += '{} is a winner with {}% HP left.'.format(second.species.name, round((second.current_hp / second.hp)*100), 2)
-                return second, report
+            move_self = self.pick_move(other)
+            move_other = other.pick_move(self)
+            for attacker, move, defender in self._move_order(self, move_self, other, move_other):
+                attacker.use_move(move, defender, battle_report)
+                if defender.current_hp == 0:
+                    hp_left = (attacker.current_hp / attacker.hp) * 100.0
+                    battle_report += f'{attacker} wins with {hp_left:.2f}% HP left.\n'
+                    return attacker, battle_report

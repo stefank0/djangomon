@@ -61,6 +61,7 @@ def load_types():
 def load_species():
     """Load all species from Pokemon API into the our own DB."""
     for pokemon in get_all('pokemon'):
+        id = pokemon.id
         name = pokemon.name
         hp = pokemon.stats[5].base_stat
         attack = pokemon.stats[4].base_stat
@@ -74,8 +75,18 @@ def load_species():
             type2 = Type.objects.get(name=pokemon.types[1].type.name)
         else:
             type2 = None
-        Species.objects.create(name=name, type1=type1, type2=type2, hp=hp, attack=attack, defense=defense,
-                               special_attack=special_attack, special_defense=special_defense, speed=speed)
+        Species.objects.create(
+            id=id,
+            name=name,
+            type1=type1,
+            type2=type2,
+            hp=hp,
+            attack=attack,
+            defense=defense,
+            special_attack=special_attack,
+            special_defense=special_defense,
+            speed=speed
+        )
 
 
 def load_abilities():
@@ -123,12 +134,3 @@ def load_pokemon():
             if is_selected(move):
                 move_name = move.move.name
                 pokemon.moves.add(Move.objects.get(name=move_name))
-
-
-def battle_sim1():
-    """First battle 'version'"""
-    for pokemon1 in Pokemon.objects.all():
-        for pokemon2 in Pokemon.objects.all():
-            winner, report = pokemon1.battle(pokemon2)
-            loser = pokemon1 if winner is pokemon2 else pokemon2
-            BattleLog.objects.create(winner=winner, loser=loser, report=report)
