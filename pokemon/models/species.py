@@ -4,6 +4,7 @@ from .type import Type
 
 
 class Species(models.Model):
+    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=16)
     type1 = models.ForeignKey(Type, models.PROTECT, related_name='species1')
     type2 = models.ForeignKey(Type, models.PROTECT, related_name='species2', blank=True, null=True)
