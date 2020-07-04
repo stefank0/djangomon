@@ -51,7 +51,7 @@ class Move(models.Model):
         """Actual damage when used by an attacker against a defender."""
         if random.random() * 100 < self.accuracy:
             damage = self.damage_value(attacker, defender)
-            damage *= random.randrange(85, 101) // 100
+            damage = damage * random.randrange(85, 101) // 100
             damage = self.stab(attacker, damage)
             effectiveness = defender.species.effectiveness(self.type)
             return math.floor(effectiveness * damage)
