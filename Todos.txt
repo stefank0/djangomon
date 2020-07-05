@@ -61,6 +61,6 @@ recoil damage van moves implementeren (pokeapi: move.meta.drain?)
 
 
 STEFAN:
-minimax, eerst alle 0 damage moves weghalen en misschien ook moves die altijd slechter zijn dan een andere (zelfde accuracy en prioriteit, maar lagere damage)
+minimax (op winstpercentage als pokemon steeds dezelfde move zou moeten gebruiken)(eerste 5 beurten verwerken, winstpercentage van pokemon + opponent hoeft niet samen 1 te zijn, bij gelijk percentage voor moves (bijvoorbeeld 0 als pokemon geen uitzicht heeft op een KO) kies hoogste expected_damage), eerst alle 0 damage moves weghalen en misschien ook moves die altijd slechter zijn dan een andere (zelfde accuracy en prioriteit, maar lagere damage)
 Houd bij AI rekening met priority en recoil damage
 test of nieuwe AI vaker wint dan oude AI (met pokemon met geschikte moveset, eerst deze pokemon nieuwe AI en tegenstander oude AI, dan andersom)

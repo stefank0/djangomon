@@ -11,7 +11,7 @@ class Move(models.Model):
     power = models.IntegerField()
     priority = models.IntegerField()
     pp = models.IntegerField()
-    accuracy = models.FloatField()
+    accuracy = models.FloatField()      # 0.0 to 100.0          # TODO: refactor to IntegerField
     type = models.ForeignKey(Type, models.PROTECT)
 
     class DamageClass(models.TextChoices):
@@ -54,9 +54,17 @@ class Move(models.Model):
         damage = self._damage_value(attacker, defender)
         return self._apply_type(attacker, defender, damage)
 
+    def true_damage(self, attacker, defender, random_number):
+        """Damage when incorporating the random number from [85, 100]."""
+        damage = self._damage_value(attacker, defender)
+        damage = damage * random_number // 100
+        return self._apply_type(attacker, defender, damage)
+
     def expected_damage(self, attacker, defender):
         """Expectation value of the damage."""
-        return 0.925 * self.accuracy * self.max_damage(attacker, defender)
+        return 0.000625 * self.accuracy * sum(
+            self.true_damage(attacker, defender, i) for i in range(85, 101)
+        )
 
     def recoil_damage(self, damage):
         """Recoil damage to the attacker when damage is done."""
@@ -65,8 +73,7 @@ class Move(models.Model):
     def damage(self, attacker, defender):
         """Actual damage when used by an attacker against a defender."""
         if random.random() * 100 < self.accuracy:
-            damage = self._damage_value(attacker, defender)
-            damage = damage * random.randrange(85, 101) // 100
-            return self._apply_type(attacker, defender, damage)
+            random_number = random.randrange(85, 101)
+            return self.true_damage(attacker, defender, random_number)
         else:
             return 0
