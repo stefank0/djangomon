@@ -7,6 +7,7 @@ from .nature import Nature
 from .ability import Ability
 from .species import Species
 from .move import Move
+from pokemon.ai import select_move
 
 
 class Pokemon(models.Model):
@@ -69,13 +70,6 @@ class Pokemon(models.Model):
     def speed(self):
         return self._stat('speed')
 
-    def pick_move(self, other):
-        """Pick the best move against another Pokemon."""
-        return max(
-            self.moves.all(),
-            key=lambda move: move.damage_expected(self, other)
-        )
-
     @staticmethod
     def _move_order(pokemon1, move1, pokemon2, move2):
         """The order in which the moves are performed."""
@@ -97,6 +91,7 @@ class Pokemon(models.Model):
         """Use a move against another Pokemon."""
         damage = move.damage(self, other)
         other.current_hp = max(other.current_hp - damage, 0)
+        self.current_hp = max(self.current_hp - move.recoil_damage(damage), 0)
         battle_report += f'{self} uses {move} with {damage} {move.damage_class} damage.\n'
         battle_report += f'HP left: {self} ({self.current_hp}) and {other} ({other.current_hp}).\n'
         return battle_report
@@ -107,8 +102,8 @@ class Pokemon(models.Model):
         other.current_hp = other.hp
         battle_report = f'{self} vs {other}\n'
         while True:
-            move_self = self.pick_move(other)
-            move_other = other.pick_move(self)
+            move_self = select_move(self, other)
+            move_other = select_move(other, self)
             for attacker, move, defender in self._move_order(self, move_self, other, move_other):
                 battle_report = attacker.use_move(move, defender, battle_report)
                 if defender.current_hp == 0:

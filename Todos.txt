@@ -32,3 +32,35 @@ Stappenplan:
 1: Als eerste type modifier:
     -Same type modifier (1,5x)
     -Different type modifier (1,0 of 0,5x afhankelijk van weakness of niet)
+
+
+
+
+
+
+2020-07-05
+NOTES:
+score = win percentage (does not depend on number of battles)
+4x weakness has too much influence when pokemon can choose all of their TMs, so allow only the learnset or limit to 4 moves.
+geen status moves, stat boosts, secondary effects of abilities (simpeler voor AI en acceptabel)
+goede status moves, stat boosts, secondary effects of abilities apart vermelden bij de pokemon (dan kan je handmatig oordelen of dat de moeite waard is)
+
+
+LATER:
+time waar de meeste rekentijd in gaat zitten
+alleen 4 beste moves? (doe run met alles, kies de 4 meest gebruikte, run alles opnieuw)
+clefable staat veel te laag vanwege kleine moveset, omdat alleen clefairy de moves leert
+probleem moves: explosion/self-destruct (skip deze bij het inladen van moves), future sight, thrash, double-edge (recoil damage verwerken), hyperbeam (hardcoded basedamage delen door 2)
+haal vanuit de battle logs welke aanvallen vaak gebruikt worden, kijk of dit acceptabel is of dat moves onterecht overpowered zijn.
+
+
+
+NICK:
+harden/transform/.. doet nu damage (moet 0 zijn)(dan ook struggle implementeren)(damage van damage moves is altijd tenminste 1)
+recoil damage van moves implementeren (pokeapi: move.meta.drain?)
+
+
+STEFAN:
+minimax, eerst alle 0 damage moves weghalen en misschien ook moves die altijd slechter zijn dan een andere (zelfde accuracy en prioriteit, maar lagere damage)
+Houd bij AI rekening met priority en recoil damage
+test of nieuwe AI vaker wint dan oude AI (met pokemon met geschikte moveset, eerst deze pokemon nieuwe AI en tegenstander oude AI, dan andersom)
