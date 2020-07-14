@@ -58,6 +58,7 @@ haal vanuit de battle logs welke aanvallen vaak gebruikt worden, kijk of dit acc
 NICK:
 harden/transform/.. doet nu damage (moet 0 zijn)(dan ook struggle implementeren)(damage van damage moves is altijd tenminste 1)
 recoil damage van moves implementeren (pokeapi: move.meta.drain?)
+testen schrijven voor ai, win_probability() (charmander met inferno tegen bulbasaur goede testcase) en battle() (win_probability testen: veel sterkere pokemon met 1.0 kans op winst, pokemon tegen zichzelf met 0.5 kans, spannender geval waarbij de langzamere pokemon een gegarandeerde 2HKO heeft.
 
 
 STEFAN:
