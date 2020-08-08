@@ -87,8 +87,9 @@ class Pokemon(models.Model):
     def use_move(self, move, opponent, battle_report):
         """Use a move against another Pokemon."""
         damage = move.damage(self, opponent)
-        opponent.current_hp = max(opponent.current_hp - damage, 0)
-        self.current_hp = max(self.current_hp - move.recoil_damage(damage), 0)
+        damage_dealt = min(opponent.current_hp, damage)
+        opponent.current_hp -= damage_dealt
+        self.current_hp = max(self.current_hp - move.recoil_damage(damage_dealt), 0)
         battle_report += f'{self} uses {move} with {damage} {move.damage_class} damage.\n'
         battle_report += f'HP left: {self} ({self.current_hp}) and {opponent} ({opponent.current_hp}).\n'
         return battle_report
