@@ -11,9 +11,8 @@ class Move(models.Model):
     power = models.IntegerField()
     priority = models.IntegerField()
     pp = models.IntegerField()
-    accuracy = models.FloatField()
+    accuracy = models.FloatField()      # 0.0 to 100.0          # TODO: refactor to IntegerField
     type = models.ForeignKey(Type, models.PROTECT)
-    # stat_changes
 
     class DamageClass(models.TextChoices):
         PHYSICAL = 'PH', 'Physical'
@@ -25,18 +24,21 @@ class Move(models.Model):
     def __str__(self):
         return self.name
 
-    def stab(self, attacker, damage):
-        """Same type attack bonus (STAB)."""
+    def _stab(self, attacker, damage):
+        """Apply same type attack bonus (STAB) to the damage."""
         types = [attacker.species.type1, attacker.species.type2]
         return (3 * damage) // 2 if (self.type in types) else damage
 
-    def damage_expected(self, attacker, defender):
-        """Expectation value of the damage."""
-        damage = self.stab(attacker, self.damage_value(attacker, defender))
+    def _effectiveness(self, defender, damage):
+        """Apply type effectiveness to the damage."""
         effectiveness = defender.species.effectiveness(self.type)
-        return math.floor(effectiveness * damage * 0.925 * self.accuracy)
+        return math.floor(effectiveness * damage)
 
-    def damage_value(self, attacker, defender):
+    def _apply_type(self, attacker, defender, damage):
+        """Apply type bonusses to the damage."""
+        return self._effectiveness(defender, self._stab(attacker, damage))
+
+    def _damage_value(self, attacker, defender):
         """Damage when the attacker hits the defender."""
         if self.damage_class == 'PH':
             attack_stat = attacker.attack
@@ -47,13 +49,31 @@ class Move(models.Model):
         level_factor = (2 * attacker.level) // 5 + 2
         return (level_factor * self.power * attack_stat // defense_stat) // 50 + 2
 
+    def max_damage(self, attacker, defender):
+        """Maximum value of the damage."""
+        damage = self._damage_value(attacker, defender)
+        return self._apply_type(attacker, defender, damage)
+
+    def true_damage(self, attacker, defender, random_number):
+        """Damage when incorporating the random number from [85, 100]."""
+        damage = self._damage_value(attacker, defender)
+        damage = damage * random_number // 100
+        return self._apply_type(attacker, defender, damage)
+
+    def expected_damage(self, attacker, defender):
+        """Expectation value of the damage."""
+        return 0.000625 * self.accuracy * sum(
+            self.true_damage(attacker, defender, i) for i in range(85, 101)
+        )
+
+    def recoil_damage(self, damage):
+        """Recoil damage to the attacker when damage is done."""
+        return 0                                                                # TODO: implement
+
     def damage(self, attacker, defender):
         """Actual damage when used by an attacker against a defender."""
         if random.random() * 100 < self.accuracy:
-            damage = self.damage_value(attacker, defender)
-            damage = damage * random.randrange(85, 101) // 100
-            damage = self.stab(attacker, damage)
-            effectiveness = defender.species.effectiveness(self.type)
-            return math.floor(effectiveness * damage)
+            random_number = random.randrange(85, 101)
+            return self.true_damage(attacker, defender, random_number)
         else:
             return 0

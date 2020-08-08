@@ -58,18 +58,22 @@ def load_types():
             instance.immunities.add(other_instance)
 
 
+def _get_base_stat(stats, name):
+    """Get the correct base stat from the Pokemon API stats list."""
+    return next(stat.base_stat for stat in stats if stat.stat.name == name)
+
+
 def load_species():
     """Load all species from Pokemon API into the our own DB."""
     for pokemon in get_all('pokemon'):
         id = pokemon.id
         name = pokemon.name
-        hp = pokemon.stats[5].base_stat
-        attack = pokemon.stats[4].base_stat
-        defense = pokemon.stats[3].base_stat
-        special_attack = pokemon.stats[2].base_stat
-        special_defense = pokemon.stats[1].base_stat
-        speed = pokemon.stats[0].base_stat
-        assert [stat.stat.name for stat in pokemon.stats] == ['speed', 'special-defense', 'special-attack', 'defense', 'attack', 'hp']
+        hp = _get_base_stat(pokemon.stats, 'hp')
+        attack = _get_base_stat(pokemon.stats, 'attack')
+        defense = _get_base_stat(pokemon.stats, 'defense')
+        special_attack = _get_base_stat(pokemon.stats, 'special-attack')
+        special_defense = _get_base_stat(pokemon.stats, 'special-defense')
+        speed = _get_base_stat(pokemon.stats, 'speed')
         type1 = Type.objects.get(name=pokemon.types[0].type.name)
         if len(pokemon.types) > 1:
             type2 = Type.objects.get(name=pokemon.types[1].type.name)
@@ -124,6 +128,7 @@ def is_selected(move):
                     return True
     return False
 
+
 def load_pokemon():
     """Load unique Pokemon creatures for the battle simulator """
     ability = Ability.objects.first()
@@ -134,3 +139,13 @@ def load_pokemon():
             if is_selected(move):
                 move_name = move.move.name
                 pokemon.moves.add(Move.objects.get(name=move_name))
+
+
+def load_all():
+    """Load all the data at once."""
+    load_natures()
+    load_types()
+    load_abilities()
+    load_moves()
+    load_species()
+    load_pokemon()

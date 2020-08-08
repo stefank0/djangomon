@@ -7,6 +7,7 @@ from .nature import Nature
 from .ability import Ability
 from .species import Species
 from .move import Move
+from pokemon.ai import select_move
 
 
 class Pokemon(models.Model):
@@ -69,47 +70,45 @@ class Pokemon(models.Model):
     def speed(self):
         return self._stat('speed')
 
-    def pick_move(self, other):
-        """Pick the best move against another Pokemon."""
-        return max(
-            self.moves.all(),
-            key=lambda move: move.damage_expected(self, other)
-        )
-
-    @staticmethod
-    def _move_order(pokemon1, move1, pokemon2, move2):
-        """The order in which the moves are performed."""
-        order1 = ((pokemon1, move1, pokemon2), (pokemon2, move2, pokemon1))
-        order2 = reversed(order1)
-        if move1.priority > move2.priority:
-            return order1
-        elif move2.priority > move1.priority:
-            return order2
+    def first(self, move, opponent, opponent_move):
+        """Returns the Pokemon that moves first or None if it is random."""
+        if move.priority > opponent_move.priority:
+            return self
+        elif opponent_move.priority > move.priority:
+            return opponent
         else:
-            if pokemon1.speed > pokemon2.speed:
-                return order1
-            elif pokemon2.speed > pokemon1.speed:
-                return order2
+            if self.speed > opponent.speed:
+                return self
+            elif opponent.speed > self.speed:
+                return opponent
             else:
-                return random.choice((order1, order2))
+                return None
 
-    def use_move(self, move, other, battle_report):
+    def use_move(self, move, opponent, battle_report):
         """Use a move against another Pokemon."""
-        damage = move.damage(self, other)
-        other.current_hp = max(other.current_hp - damage, 0)
+        damage = move.damage(self, opponent)
+        opponent.current_hp = max(opponent.current_hp - damage, 0)
+        self.current_hp = max(self.current_hp - move.recoil_damage(damage), 0)
         battle_report += f'{self} uses {move} with {damage} {move.damage_class} damage.\n'
-        battle_report += f'HP left: {self} ({self.current_hp}) and {other} ({other.current_hp}).\n'
+        battle_report += f'HP left: {self} ({self.current_hp}) and {opponent} ({opponent.current_hp}).\n'
         return battle_report
 
-    def battle(self, other):
+    def battle(self, opponent):
         """Battle with another Pokemon. The winner is returned."""
-        self.current_hp = self.hp
-        other.current_hp = other.hp
-        battle_report = f'{self} vs {other}\n'
+        battle_report = f'{self} vs {opponent}\n'
+        for pokemon in [self, opponent]:
+            pokemon.current_hp = pokemon.hp     # Initialize with full HP
         while True:
-            move_self = self.pick_move(other)
-            move_other = other.pick_move(self)
-            for attacker, move, defender in self._move_order(self, move_self, other, move_other):
+            # Select moves:
+            move = select_move(self, opponent)
+            opponent_move = select_move(opponent, self)
+            # Determine move order:
+            first = self.first(move, opponent, opponent_move)
+            first = first if (first is not None) else random.choice((self, opponent))
+            move_order = ((self, move, opponent), (opponent, opponent_move, self))
+            move_order = move_order if (first is self) else reversed(move_order)
+            # Execute the moves:
+            for attacker, move, defender in move_order:
                 battle_report = attacker.use_move(move, defender, battle_report)
                 if defender.current_hp == 0:
                     hp_left = (attacker.current_hp / attacker.hp) * 100.0
