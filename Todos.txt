@@ -57,9 +57,11 @@ haal vanuit de battle logs welke aanvallen vaak gebruikt worden, kijk of dit acc
 
 NICK:
 harden/transform/.. doet nu damage (moet 0 zijn)(dan ook struggle implementeren)(damage van damage moves is altijd tenminste 1)
+Hyperbeam/Future sight
+explosion/self-destruct checken; op moment geen self dmg
 recoil damage van moves implementeren (pokeapi: move.meta.drain?)
-testen schrijven voor ai, win_probability() (charmander met inferno tegen bulbasaur goede testcase) en battle() (win_probability testen: veel sterkere pokemon met 1.0 kans op winst, pokemon tegen zichzelf met 0.5 kans, spannender geval waarbij de langzamere pokemon een gegarandeerde 2HKO heeft.
-
+testen schrijven voor ai, win_probability() (charmander met inferno tegen bulbasaur goede testcase) en battle() (win_probability testen: veel sterkere pokemon met 1.0 kans op winst, pokemon tegen zichzelf met 0.5 kans, spannender geval waarbij de langzamere pokemon een gegarandeerde 1 + 2HKO heeft.
+uitzoeken generatie set van Pixelmon (de versie die laatst gebruikt hebben voor de map)
 
 STEFAN:
 minimax (op winstpercentage als pokemon steeds dezelfde move zou moeten gebruiken)(eerste 5 beurten verwerken, winstpercentage van pokemon + opponent hoeft niet samen 1 te zijn, bij gelijk percentage voor moves (bijvoorbeeld 0 als pokemon geen uitzicht heeft op een KO) kies hoogste expected_damage), eerst alle 0 damage moves weghalen en misschien ook moves die altijd slechter zijn dan een andere (zelfde accuracy en prioriteit, maar lagere damage)

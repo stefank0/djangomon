@@ -10,6 +10,7 @@
 * python manage.py shell
 * python manage.py createsuperuser
 * python manage.py runserver
+* python manage.py test
 
 # Playing Pokemon
 
