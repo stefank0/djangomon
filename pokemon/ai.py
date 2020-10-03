@@ -1,10 +1,48 @@
 from math import isclose
 
 
-def select_move(pokemon, opponent):
+def select_move_naive(pokemon, opponent):
     """Select a move for a Pokemon when facing a certain opponent."""
     return max(
         pokemon.moves.all(),
+        key=lambda move: move.expected_damage(pokemon, opponent)
+    )
+
+
+def _moves(pokemon, opponent):
+    """Moves that are considered by the AI.
+
+    Notes:
+        Only the strongest move within a set of moves with the same accuracy
+        and priority needs to be considered.
+    """
+    partitions = {}
+    for move in pokemon.moves.all():
+        key = (move.priority, move.accuracy)
+        partitions.setdefault(key, []).append(move)
+    return [
+        max(partition, key=lambda move: move.max_damage(pokemon, opponent))
+        for partition in partitions.values()
+    ]
+
+
+def _min_win_probability(pokemon, move, opponent, opponent_moves):
+    return min(
+        win_probability(pokemon, move, opponent, opponent_move)
+        for opponent_move in opponent_moves
+    )
+
+
+def select_move(pokemon, opponent):
+    """Select a move for a Pokemon when facing a certain opponent (minimax)."""
+    moves = _moves(pokemon, opponent)
+    opponent_moves = _moves(opponent, pokemon)
+    scores = [
+        _min_win_probability(pokemon, move, opponent, opponent_moves)
+        for move in moves
+    ]
+    return max(
+        [move for move, score in zip(moves, scores) if score == max(scores)],
         key=lambda move: move.expected_damage(pokemon, opponent)
     )
 
@@ -72,7 +110,7 @@ def _faint_distribution(pokemon, move, opponent):
 
 
 def win_probability(pokemon, move, opponent, opponent_move):
-    """Probabilities for both pokemon to win within 5 turns."""
+    """Probabilities for both pokemon to win within some turns."""
     first = pokemon.first(move, opponent, opponent_move)
     p_win = 0.0
     p_lose = 0.0
