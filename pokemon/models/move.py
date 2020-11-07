@@ -47,7 +47,13 @@ class Move(models.Model):
             attack_stat = attacker.special_attack
             defense_stat = defender.special_defense
         level_factor = (2 * attacker.level) // 5 + 2
-        return (level_factor * self.power * attack_stat // defense_stat) // 50 + 2
+        power = self.power
+        nerf_factors = {
+            'hyper-beam': 0.5,
+            'future-sight': 0.5
+        }
+        power = round(self.power * nerf_factors.get(self.name, 1.0))
+        return (level_factor * power * attack_stat // defense_stat) // 50 + 2
 
     def max_damage(self, attacker, defender):
         """Maximum value of the damage."""
