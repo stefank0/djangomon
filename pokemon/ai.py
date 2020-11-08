@@ -9,6 +9,28 @@ def select_move_naive(pokemon, opponent):
     )
 
 
+def _benchmark_move(pokemon, opponent):
+    """Basic move to compare other moves with."""
+    moves = pokemon.moves.filter(priority=0, accuracy=100, drain=0, recoil=0)
+    if moves:
+        return max(moves, key=lambda move: move.max_damage(pokemon, opponent))
+    else:
+        return None
+
+
+def _is_useful(pokemon, opponent, move, benchmark_move):
+    """Used to filter useless moves."""
+    return (
+        benchmark_move is None) or (
+        move == benchmark_move) or (
+        move.priority > benchmark_move.priority) or (
+        move.accuracy > benchmark_move.accuracy) or (
+        move.drain > benchmark_move.drain) or (
+        move.recoil < benchmark_move.recoil) or (
+        move.max_damage(pokemon, opponent) > benchmark_move.max_damage(pokemon, opponent)
+    )
+
+
 def _moves(pokemon, opponent):
     """Moves that are considered by the AI.
 
@@ -16,10 +38,12 @@ def _moves(pokemon, opponent):
         Only the strongest move within a set of moves with the same accuracy
         and priority needs to be considered.
     """
+    benchmark_move = _benchmark_move(pokemon, opponent)
     partitions = {}
     for move in pokemon.moves.all():
-        key = (move.priority, move.accuracy, move.drain, move.recoil)
-        partitions.setdefault(key, []).append(move)
+        if _is_useful(pokemon, opponent, move, benchmark_move):
+            key = (move.priority, move.accuracy, move.drain, move.recoil)
+            partitions.setdefault(key, []).append(move)
     return [
         max(partition, key=lambda move: move.max_damage(pokemon, opponent))
         for partition in partitions.values()
