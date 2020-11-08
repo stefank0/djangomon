@@ -84,15 +84,15 @@ class Pokemon(models.Model):
             else:
                 return None
 
-    def use_move(self, move, opponent, battle_report):
+    def use_move(self, move, opponent):
         """Use a move against another Pokemon."""
         damage = move.damage(self, opponent)
         damage_dealt = min(opponent.current_hp, damage)
         opponent.current_hp -= damage_dealt
-        self.current_hp = max(self.current_hp - move.recoil_damage(damage_dealt), 0)
-        battle_report += f'{self} uses {move} with {damage} {move.damage_class} damage.\n'
-        battle_report += f'HP left: {self} ({self.current_hp}) and {opponent} ({opponent.current_hp}).\n'
-        return battle_report
+        self.current_hp -= min(move.recoil_damage(damage_dealt), self.current_hp)
+        self.current_hp += min(move.drain_recovery(damage_dealt), self.hp - self.current_hp)
+        return (f'{self} uses {move} with {damage} {move.damage_class} damage.\n'
+            f'HP left: {self} ({self.current_hp}) and {opponent} ({opponent.current_hp}).\n')
 
     def battle(self, opponent):
         """Battle with another Pokemon. The winner is returned."""
@@ -110,7 +110,7 @@ class Pokemon(models.Model):
             move_order = move_order if (first is self) else reversed(move_order)
             # Execute the moves:
             for attacker, move, defender in move_order:
-                battle_report = attacker.use_move(move, defender, battle_report)
+                battle_report += attacker.use_move(move, defender)
                 if defender.current_hp == 0:
                     hp_left = (attacker.current_hp / attacker.hp) * 100.0
                     battle_report += f'{attacker} wins with {hp_left:.2f}% HP left.\n'

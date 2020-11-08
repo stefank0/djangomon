@@ -11,8 +11,10 @@ class Move(models.Model):
     power = models.IntegerField()
     priority = models.IntegerField()
     pp = models.IntegerField()
-    accuracy = models.FloatField()      # 0.0 to 100.0          # TODO: refactor to IntegerField
+    accuracy = models.IntegerField()
     type = models.ForeignKey(Type, models.PROTECT)
+    drain = models.IntegerField()
+    recoil = models.IntegerField()
 
     class DamageClass(models.TextChoices):
         PHYSICAL = 'PH', 'Physical'
@@ -47,7 +49,6 @@ class Move(models.Model):
             attack_stat = attacker.special_attack
             defense_stat = defender.special_defense
         level_factor = (2 * attacker.level) // 5 + 2
-        power = self.power
         nerf_factors = {
             'hyper-beam': 0.5,
             'future-sight': 0.5
@@ -74,7 +75,11 @@ class Move(models.Model):
 
     def recoil_damage(self, damage):
         """Recoil damage to the attacker when damage is done."""
-        return 0                                                                # TODO: implement
+        return damage * self.recoil // 100
+
+    def drain_recovery(self, damage):
+        """HP healed by draining HP of the defender."""
+        return damage * self.drain // 100
 
     def damage(self, attacker, defender):
         """Actual damage when used by an attacker against a defender."""

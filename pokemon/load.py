@@ -67,6 +67,8 @@ def load_species():
     """Load all species from Pokemon API into the our own DB."""
     for pokemon in get_all('pokemon'):
         id = pokemon.id
+        if id > 386:
+            break  # up to 3rd gen only
         name = pokemon.name
         hp = _get_base_stat(pokemon.stats, 'hp')
         attack = _get_base_stat(pokemon.stats, 'attack')
@@ -101,31 +103,43 @@ def load_abilities():
 
 
 def load_moves():
-    """Load all moves from Pokemoon API into our own DB."""
+    """Load all moves from Pokemon API into our own DB."""
     for move in get_all('move'):
-        name = move.name
         power = move.power
         if power is None:
             power = 0
-        priority = move.priority
-        """Accuracy needs to be modified but for now okay because it Null is different from 100. Can be influenced"""
         accuracy = move.accuracy
         if accuracy is None:
-            accuracy = 100
-        pp = move.pp
+            accuracy = 100  # Quick Fix. Moves without accuracy cannot miss at all.
         type_ = Type.objects.get(name=move.type.name)
-        damage_classes = {'physical': 'PH', 'special': 'SP', 'status': 'ST'}
+        damage_classes = {
+            'physical': Move.DamageClass.PHYSICAL,
+            'special': Move.DamageClass.SPECIAL,
+            'status': Move.DamageClass.STATUS
+        }
         damage_class = damage_classes[move.damage_class.name]
-        Move.objects.create(name=name, power=power, priority=priority,
-                            accuracy=accuracy, pp=pp, type=type_, damage_class=damage_class)
+        drain = max(move.meta.drain, 0)
+        recoil = max(-move.meta.drain, 0)
+        Move.objects.create(
+            name=move.name,
+            power=power,
+            priority=move.priority,
+            accuracy=accuracy,
+            pp=move.pp,
+            type=type_,
+            damage_class=damage_class,
+            drain=drain,
+            recoil=recoil
+        )
+
 
 def is_selected(move):
     """Load Pokemon moves based on its learnset"""
     for details in move.version_group_details:
-        if details['version_group']['name'] == 'ultra-sun-ultra-moon':
+        if details['version_group']['name'] == 'black-white':
             if details['move_learn_method']['name'] == 'level-up':
-                if details['level_learned_at'] < 60:
-                    return True
+                # if details['level_learned_at'] < 60:
+                return True
     return False
 
 

@@ -11,3 +11,9 @@ def battle():
                 winner, report = pokemon1.battle(pokemon2)
                 loser = pokemon1 if winner is pokemon2 else pokemon2
                 BattleLog.objects.create(winner=winner, loser=loser, report=report)
+
+
+def test():
+    bulbasaur = Pokemon.objects.get(species__name='bulbasaur')
+    ekans = Pokemon.objects.get(species__name='ekans')
+    print(bulbasaur.battle(ekans))

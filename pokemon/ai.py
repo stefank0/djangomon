@@ -26,7 +26,8 @@ def _moves(pokemon, opponent):
     ]
 
 
-def _min_win_probability(pokemon, move, opponent, opponent_moves):
+def _score(pokemon, move, opponent, opponent_moves):
+    """Score a move by the minimum win probability."""
     return min(
         win_probability(pokemon, move, opponent, opponent_move)
         for opponent_move in opponent_moves
@@ -37,10 +38,7 @@ def select_move(pokemon, opponent):
     """Select a move for a Pokemon when facing a certain opponent (minimax)."""
     moves = _moves(pokemon, opponent)
     opponent_moves = _moves(opponent, pokemon)
-    scores = [
-        _min_win_probability(pokemon, move, opponent, opponent_moves)
-        for move in moves
-    ]
+    scores = [_score(pokemon, move, opponent, opponent_moves) for move in moves]
     return max(
         [move for move, score in zip(moves, scores) if score == max(scores)],
         key=lambda move: move.expected_damage(pokemon, opponent)
@@ -64,12 +62,35 @@ def _damage_distribution(pokemon, move, opponent):
     return distr
 
 
-def _faint_probability(distr, opponent):
+def _opponent_recovery(pokemon, move, opponent, opponent_move, turns):
+    """Expected recovery for the opponent."""
+    expected_damage = round(opponent_move.expected_damage(opponent, pokemon))
+    expected_recovery = opponent_move.drain_recovery(expected_damage)
+    max_recovery = opponent_move.drain_recovery(pokemon.current_hp)
+    if pokemon.first(move, opponent, opponent_move) == opponent:
+        turns += 1  # One more turn of recovery before the attack of the pokemon.
+    return min(turns * expected_recovery, max_recovery)
+
+
+def _opponent_hp(pokemon, move, opponent, opponent_move, turns, is_selecting):
+    """HP used to calculate the faint probability."""
+    hp = opponent.current_hp
+    if not is_selecting:  # When selecting a move, do not assume the opponent hurts itself.
+        # When considering a move with recoil damage, subtract the full recoil
+        # damage, because you need to take this damage in order to win without
+        # dying. The case where both pokemon die is ignored, but it is good to
+        # discourage recoil damage moves a bit extra.
+        hp -= opponent_move.recoil_damage(pokemon.current_hp)
+    hp += _opponent_recovery(pokemon, move, opponent, opponent_move, turns)
+    return hp
+
+
+def _faint_probability(distr, opponent_hp):
     """Probability that the opponent faints given a damage distribution."""
     return sum(
         probability
         for damage, probability in distr.items()
-        if damage >= opponent.current_hp
+        if damage >= opponent_hp
     )
 
 
@@ -96,10 +117,16 @@ def _cumulative_damage_distributions(pokemon, move, opponent):
     return distributions
 
 
-def _faint_distribution(pokemon, move, opponent):
+def _faint_distribution(pokemon, move, opponent, opponent_move, is_selecting):
     """Probability distribution of the turn the opponent faints."""
     distributions = _cumulative_damage_distributions(pokemon, move, opponent)
-    cdf = [_faint_probability(distr, opponent) for distr in distributions]
+    cdf = [
+        _faint_probability(
+            distr,
+            _opponent_hp(pokemon, move, opponent, opponent_move, turns, is_selecting)
+        )
+        for turns, distr in enumerate(distributions)
+    ]
     pdf = [
         probability - probability_previous
         for probability, probability_previous in zip(cdf, [0.0] + cdf[:-1])
@@ -110,13 +137,13 @@ def _faint_distribution(pokemon, move, opponent):
 
 
 def win_probability(pokemon, move, opponent, opponent_move):
-    """Probabilities for both pokemon to win within some turns."""
+    """Probability that the pokemon wins within the next couple of turns."""
     first = pokemon.first(move, opponent, opponent_move)
     p_win = 0.0
     p_lose = 0.0
     p_undecided = 0.0
-    for turn_opponent_faints, p1 in _faint_distribution(pokemon, move, opponent).items():
-        for turn_pokemon_faints, p2 in _faint_distribution(opponent, opponent_move, pokemon).items():
+    for turn_opponent_faints, p1 in _faint_distribution(pokemon, move, opponent, opponent_move, True).items():
+        for turn_pokemon_faints, p2 in _faint_distribution(opponent, opponent_move, pokemon, move, False).items():
             probability = p1 * p2
             if turn_pokemon_faints > turn_opponent_faints:
                 p_win += probability
@@ -132,4 +159,4 @@ def win_probability(pokemon, move, opponent, opponent_move):
                 else:
                     p_win += 0.5 * probability
                     p_lose += 0.5 * probability
-    return p_win, p_lose, p_undecided
+    return p_win
