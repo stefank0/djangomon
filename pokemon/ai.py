@@ -18,7 +18,7 @@ def _moves(pokemon, opponent):
     """
     partitions = {}
     for move in pokemon.moves.all():
-        key = (move.priority, move.accuracy)
+        key = (move.priority, move.accuracy, move.drain, move.recoil)
         partitions.setdefault(key, []).append(move)
     return [
         max(partition, key=lambda move: move.max_damage(pokemon, opponent))
@@ -80,8 +80,10 @@ def _opponent_hp(pokemon, move, opponent, opponent_move, turns, is_selecting):
         # damage, because you need to take this damage in order to win without
         # dying. The case where both pokemon die is ignored, but it is good to
         # discourage recoil damage moves a bit extra.
-        hp -= opponent_move.recoil_damage(pokemon.current_hp)
-    hp += _opponent_recovery(pokemon, move, opponent, opponent_move, turns)
+        if opponent_move.recoil > 0:
+            hp -= opponent_move.recoil_damage(pokemon.current_hp)
+    if opponent_move.drain > 0:
+        hp += _opponent_recovery(pokemon, move, opponent, opponent_move, turns)
     return hp
 
 
