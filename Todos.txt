@@ -57,7 +57,7 @@ haal vanuit de battle logs welke aanvallen vaak gebruikt worden, kijk of dit acc
 
 NICK:
 harden/transform/.. doet nu damage (moet 0 zijn)(dan ook struggle implementeren)(damage van damage moves is altijd tenminste 1)
-Hyperbeam/Future sight/last-resort/outrage
+Hyperbeam/Future sight/last-resort/outrage/skull-bash
 explosion/self-destruct checken; op moment geen self dmg
 testen schrijven voor ai, win_probability() (charmander met inferno tegen bulbasaur goede testcase) en battle() (win_probability testen: veel sterkere pokemon met 1.0 kans op winst, pokemon tegen zichzelf met 0.5 kans, spannender geval waarbij de langzamere pokemon een gegarandeerde 1 + 2HKO heeft.
 uitzoeken generatie set van Pixelmon (de versie die laatst gebruikt hebben voor de map)
@@ -76,3 +76,45 @@ HP left: bulbasaur (24) and ekans (53).
 ekans uses bite with 29 PH damage.
 HP left: ekans (53) and bulbasaur (0).
 ekans wins with 50.48% HP left.
+
+
+
+OPLOSSEN DOOR GEEN RECOIL MOVE TE KIEZEN BIJ GELIJKE KANSEN (bulbasaur vs butterfree goede testcase dat er als nodig toch nog wel recoil moves gekozen worden):
+bulbasaur vs rattata
+rattata uses double-edge with 90 PH damage.
+HP left: rattata (71) and bulbasaur (25).
+bulbasaur uses seed-bomb with 69 PH damage.
+HP left: bulbasaur (25) and rattata (2).
+rattata uses double-edge with 81 PH damage.
+HP left: rattata (0) and bulbasaur (0).
+rattata wins with 0.00% HP left.
+
+
+UITZOEKEN:
+bulbasaur vs pikachu
+pikachu uses slam with 38 PH damage.
+HP left: pikachu (105) and bulbasaur (77).
+bulbasaur uses double-edge with 54 PH damage.
+HP left: bulbasaur (60) and pikachu (51).
+pikachu uses slam with 38 PH damage.
+HP left: pikachu (51) and bulbasaur (22).
+bulbasaur uses double-edge with 56 PH damage.
+HP left: bulbasaur (6) and pikachu (0).
+bulbasaur wins with 5.22% HP left.
+
+VS
+
+bulbasaur vs raichu
+raichu uses thunderbolt with 36 SP damage.
+HP left: raichu (130) and bulbasaur (79).
+bulbasaur uses seed-bomb with 48 PH damage.
+HP left: bulbasaur (79) and raichu (82).
+raichu uses thunderbolt with 33 SP damage.
+HP left: raichu (82) and bulbasaur (46).
+bulbasaur uses seed-bomb with 42 PH damage.
+HP left: bulbasaur (46) and raichu (40).
+raichu uses thunderbolt with 33 SP damage.
+HP left: raichu (40) and bulbasaur (13).
+bulbasaur uses seed-bomb with 46 PH damage.
+HP left: bulbasaur (13) and raichu (0).
+bulbasaur wins with 11.30% HP left.
