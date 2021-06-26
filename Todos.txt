@@ -65,6 +65,7 @@ uitzoeken generatie set van Pixelmon (de versie die laatst gebruikt hebben voor 
 STEFAN:
 test of nieuwe AI vaker wint dan oude AI (met pokemon met geschikte moveset, eerst deze pokemon nieuwe AI en tegenstander oude AI, dan andersom)
 add pre-evolution moves (clefable) (only use fully evolved pokemon?)(check if Gengar is good)
+Fairy type introduction seems standard in Pokemon API. Find out if this can be excluded or not
 
 
 Test schrijven:

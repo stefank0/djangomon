@@ -45,15 +45,15 @@ def load_types():
         name = type_.name
         instance, _created = Type.objects.get_or_create(name=name)
         for other_type in type_.damage_relations.double_damage_from:
-            other_name = other_type['name']
+            other_name = other_type.name
             other_instance, _created = Type.objects.get_or_create(name=other_name)
             instance.weaknesses.add(other_instance)
         for other_type in type_.damage_relations.half_damage_from:
-            other_name = other_type['name']
+            other_name = other_type.name
             other_instance, _created = Type.objects.get_or_create(name=other_name)
             instance.resistances.add(other_instance)
         for other_type in type_.damage_relations.no_damage_from:
-            other_name = other_type['name']
+            other_name = other_type.name
             other_instance, _created = Type.objects.get_or_create(name=other_name)
             instance.immunities.add(other_instance)
 
@@ -66,8 +66,8 @@ def _get_base_stat(stats, name):
 def load_species():
     """Load all species from Pokemon API into the our own DB."""
     for pokemon in get_all('pokemon'):
-        id = pokemon.id
-        if id > 386:
+        id_ = pokemon.id
+        if id_ > 386:
             break  # up to 3rd gen only
         name = pokemon.name
         hp = _get_base_stat(pokemon.stats, 'hp')
@@ -82,7 +82,7 @@ def load_species():
         else:
             type2 = None
         Species.objects.create(
-            id=id,
+            id=id_,
             name=name,
             type1=type1,
             type2=type2,
@@ -105,27 +105,27 @@ def load_abilities():
 def load_moves():
     """Load all moves from Pokemon API into our own DB."""
     for move in get_all('move'):
-        power = move.power
-        if power is None:
-            power = 0
-        accuracy = move.accuracy
-        if accuracy is None:
-            accuracy = 100  # Quick Fix. Moves without accuracy cannot miss at all.
+        power = move.power if move.power else 0
+        accuracy = move.accuracy if move.accuracy else 0
+        pp = move.pp if move.pp else 0
         type_ = Type.objects.get(name=move.type.name)
         damage_classes = {
             'physical': Move.DamageClass.PHYSICAL,
             'special': Move.DamageClass.SPECIAL,
             'status': Move.DamageClass.STATUS
         }
-        damage_class = damage_classes[move.damage_class.name]
-        drain = max(move.meta.drain, 0)
-        recoil = max(-move.meta.drain, 0)
+        if move.damage_class:
+            damage_class = damage_classes[move.damage_class.name]
+        else:
+            damage_class = Move.DamageClass.STATUS
+        drain = max(move.meta.drain, 0) if move.meta else 0
+        recoil = max(-move.meta.drain, 0) if move.meta else 0
         Move.objects.create(
             name=move.name,
             power=power,
             priority=move.priority,
             accuracy=accuracy,
-            pp=move.pp,
+            pp=pp,
             type=type_,
             damage_class=damage_class,
             drain=drain,
@@ -134,11 +134,11 @@ def load_moves():
 
 
 def is_selected(move):
-    """Load Pokemon moves based on its learnset"""
+    """Load Pokemon moves based on its learn set"""
     for details in move.version_group_details:
-        if details['version_group']['name'] == 'black-white':
-            if details['move_learn_method']['name'] == 'level-up':
-                # if details['level_learned_at'] < 60:
+        if details.version_group.name == 'black-white':
+            if details.move_learn_method.name == 'level-up':
+                # if details.level_learned_at < 60:
                 return True
     return False
 

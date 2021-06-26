@@ -3,7 +3,6 @@ from django.db.models import Count
 
 from .models import Ability, Move, Nature, Pokemon, Species, Type, BattleLog
 
-# Register your models here.
 admin.site.register((Nature, Type))
 
 
