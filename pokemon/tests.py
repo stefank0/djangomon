@@ -62,10 +62,11 @@ class PokemonTestCase(TestCase):
             type=self.type1,
             damage_class=Move.DamageClass.SPECIAL,
             drain=0,
-            recoil=0
+            recoil=0,
+            nerf_factor=0.66
         )
         damage = move.max_damage(attacker=self.attacker, defender=self.defender)
-        self.assertEqual(damage, 52)
+        self.assertEqual(damage, 67)
 
     def test_future_sight(self):
         """Testing implementation of future sight move"""
@@ -78,10 +79,11 @@ class PokemonTestCase(TestCase):
             type=self.type3,
             damage_class=Move.DamageClass.SPECIAL,
             drain=0,
-            recoil=0
+            recoil=0,
+            nerf_factor=0.66
         )
         damage = move.max_damage(attacker=self.attacker, defender=self.defender)
-        self.assertEqual(damage, 28)
+        self.assertEqual(damage, 36)
 
     def test_zero_power_move(self):
         """Zero power moves should do zero damage."""
