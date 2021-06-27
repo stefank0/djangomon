@@ -93,6 +93,15 @@ def load_species():
             special_defense=special_defense,
             speed=speed
         )
+    for pokemon in get_all('pokemon'):
+        evolves_from = pokemon.species.evolves_from_species
+        if evolves_from:
+            try:
+                species = Species.objects.get(name=pokemon.name)
+                species.evolves_from = Species.objects.get(name=evolves_from.name)
+                species.save()
+            except Species.DoesNotExist:
+                print(f'DoesNotExist: {pokemon.name}, {evolves_from.name}')
 
 
 def load_abilities():
@@ -100,6 +109,57 @@ def load_abilities():
     for ability in get_all('ability'):
         name = ability.name
         Ability.objects.create(name=name)
+
+
+def _is_noteworthy(move):
+    if move.name in ['toxic-spikes', 'spikes', 'stealth-rock', 'sunny-day', 'rain-dance', 'sandstorm', 'hail']:
+        return True
+    accuracy = move.accuracy if move.accuracy else 100
+    power = move.power if move.power else 0
+    if move.stat_changes:
+        scores = {
+            'attack': 2,
+            'special-attack': 2,
+            'speed': 1,
+            'defense': 1,
+            'special-defense': 1,
+            'hp': 1,
+            'accuracy': 1,
+            'evasion': 1
+        }
+        score = sum(
+            stat_change.change * scores[stat_change.stat.name]
+            for stat_change in move.stat_changes
+        )
+        score += power / 40
+        effect_chance = move.effect_chance if move.effect_chance else 100
+        chance = effect_chance * accuracy / 100
+        if (score * chance / 100 >= 3) and (move.name != 'swagger'):
+            return True
+    meta = move.meta
+    if meta is None:
+        return False
+    if meta.healing and meta.healing >= 50:
+        return True
+    if meta.flinch_chance and meta.flinch_chance >= 75:
+        return True
+    ailments = [
+        'paralysis',
+        'freeze',
+        'sleep',
+        'burn',
+        'poison',
+        'leech-seed',
+        'ingrain'
+    ]
+    if meta.ailment.name in ailments:
+        ailment_chance = meta.ailment_chance if meta.ailment_chance else 100
+        chance = ailment_chance * accuracy / 100
+        if (chance >= 75) or (chance >= 30 and power >= 80):
+            return True
+        if (chance >= 60) and meta.ailment.name in ['freeze', 'sleep']:
+            return True
+    return False
 
 
 def load_moves():
@@ -120,6 +180,7 @@ def load_moves():
             damage_class = Move.DamageClass.STATUS
         drain = max(move.meta.drain, 0) if move.meta else 0
         recoil = max(-move.meta.drain, 0) if move.meta else 0
+        is_noteworthy = _is_noteworthy(move)
         Move.objects.create(
             name=move.name,
             power=power,
@@ -129,7 +190,8 @@ def load_moves():
             type=type_,
             damage_class=damage_class,
             drain=drain,
-            recoil=recoil
+            recoil=recoil,
+            is_noteworthy=is_noteworthy
         )
 
 
@@ -155,6 +217,58 @@ def load_pokemon():
                 pokemon.moves.add(Move.objects.get(name=move_name))
 
 
+def _pre_evolution_moves(pokemon):
+    evolves_from = pokemon.species.evolves_from
+    if evolves_from:
+        pokemon = Pokemon.objects.get(species=evolves_from)
+        pre_evolution_moves = _pre_evolution_moves(pokemon)
+        return list(pokemon.moves.all()) + pre_evolution_moves
+    else:
+        return []
+
+
+def apply_corrections():
+    struggle = Move.objects.get(name='struggle')
+    for pokemon in Pokemon.objects.all():
+        pokemon.moves.add(struggle)  # Avoids problems with 0 damage moves.
+    for move in Move.objects.filter(name__in=['explosion', 'self-destruct']):
+        move.recoil = 10000  # Probably kills the Pokemon using the move.
+        move.save()
+    nerf_factors = {
+        'struggle': 0.2,
+        'last-resort': 0.33,
+        'dream-eater': 0.33,
+        'focus-punch': 0.33,
+        'skull-bash': 0.5,
+        'sky-attack': 0.5,
+        'solar-beam': 0.5,
+        'razor-wind': 0.5,
+        'blast-burn': 0.66,
+        'frenzy-plant': 0.66,
+        'hydro-cannon': 0.66,
+        'rock-wrecker': 0.66,
+        'roar-of-time': 0.66,
+        'giga-impact': 0.66,
+        'hyper-beam': 0.66,
+        'future-sight': 0.66,
+        'water-spout': 0.75,
+        'eruption': 0.75,
+        'overheat': 0.75,
+        'draco-meteor': 0.75,
+        'leaf-storm': 0.75,
+        'superpower': 0.875,
+        'close-combat': 0.875
+    }
+    for move in Move.objects.filter(name__in=nerf_factors.keys()):
+        move.nerf_factor = nerf_factors[move.name]
+        move.save()
+    for pokemon in Pokemon.objects.all():
+        moves = pokemon.moves.all()
+        for move in _pre_evolution_moves(pokemon):
+            if move not in moves:
+                pokemon.moves.add(move)
+
+
 def load_all():
     """Load all the data at once."""
     load_natures()
@@ -163,3 +277,4 @@ def load_all():
     load_moves()
     load_species()
     load_pokemon()
+    apply_corrections()

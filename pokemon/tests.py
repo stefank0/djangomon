@@ -7,7 +7,6 @@ class PokemonTestCase(TestCase):
         self.nature1 = Nature.objects.create(name="lax")
         self.nature2 = Nature.objects.create(name="quirky")
         self.ability1 = Ability.objects.create(name="stench")
-
         self.type1 = Type.objects.create(name="normal")
         self.type2 = Type.objects.create(name="flying")
         self.type3 = Type.objects.create(name="psychic")
@@ -35,11 +34,6 @@ class PokemonTestCase(TestCase):
         )
         self.attacker = Pokemon.objects.create(species=self.species1, ability=self.ability1, nature=self.nature1)
         self.defender = Pokemon.objects.create(species=self.species1, ability=self.ability1, nature=self.nature1)
-
-    def test_natures(self):
-        """Something something"""
-        name = self.nature1.name
-        self.assertEqual(name, 'lax')
 
     def test_tackle(self):
         """Testing implementation of tackle move"""
@@ -88,3 +82,19 @@ class PokemonTestCase(TestCase):
         )
         damage = move.max_damage(attacker=self.attacker, defender=self.defender)
         self.assertEqual(damage, 28)
+
+    def test_zero_power_move(self):
+        """Zero power moves should do zero damage."""
+        move = Move.objects.create(
+            name='swords-dance',
+            power=0,
+            priority=0,
+            accuracy=100,
+            pp=10,
+            type=self.type3,
+            damage_class=Move.DamageClass.STATUS,
+            drain=0,
+            recoil=0
+        )
+        damage = move.max_damage(attacker=self.attacker, defender=self.defender)
+        self.assertEqual(damage, 0)

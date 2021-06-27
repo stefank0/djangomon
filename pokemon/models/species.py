@@ -8,6 +8,7 @@ class Species(models.Model):
     name = models.CharField(max_length=16)
     type1 = models.ForeignKey(Type, models.PROTECT, related_name='species1')
     type2 = models.ForeignKey(Type, models.PROTECT, related_name='species2', blank=True, null=True)
+    evolves_from = models.ForeignKey('self', models.SET_NULL, blank=True, null=True)
 
     # Base stats
     hp = models.IntegerField()

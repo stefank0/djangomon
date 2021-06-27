@@ -7,7 +7,7 @@
 * cd djangomon
 * pip install -r requirements.txt
 * python manage.py migrate
-* python manage.py shell
 * python manage.py createsuperuser
-* python manage.py runserver
 * python manage.py test
+* python manage.py shell (pokemon.load.load_all() and pokemon.simulator.battle())
+* python manage.py runserver

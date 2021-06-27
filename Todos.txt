@@ -49,22 +49,16 @@ goede status moves, stat boosts, secondary effects of abilities apart vermelden 
 LATER:
 time waar de meeste rekentijd in gaat zitten
 alleen 4 beste moves? (doe run met alles, kies de 4 meest gebruikte, run alles opnieuw)
-clefable staat veel te laag vanwege kleine moveset, omdat alleen clefairy de moves leert
-probleem moves: explosion/self-destruct (skip deze bij het inladen van moves), future sight, thrash, double-edge (recoil damage verwerken), hyperbeam (hardcoded basedamage delen door 2)
-haal vanuit de battle logs welke aanvallen vaak gebruikt worden, kijk of dit acceptabel is of dat moves onterecht overpowered zijn.
 
 
 
 NICK:
-harden/transform/.. doet nu damage (moet 0 zijn)(dan ook struggle implementeren)(damage van damage moves is altijd tenminste 1)
-Hyperbeam/Future sight/last-resort/outrage/skull-bash
-explosion/self-destruct checken; op moment geen self dmg
 testen schrijven voor ai, win_probability() (charmander met inferno tegen bulbasaur goede testcase) en battle() (win_probability testen: veel sterkere pokemon met 1.0 kans op winst, pokemon tegen zichzelf met 0.5 kans, spannender geval waarbij de langzamere pokemon een gegarandeerde 1 + 2HKO heeft.
-uitzoeken generatie set van Pixelmon (de versie die laatst gebruikt hebben voor de map)
 
 STEFAN:
+haal vanuit de battle logs welke aanvallen vaak gebruikt worden, kijk of dit acceptabel is of dat moves onterecht overpowered zijn.
 test of nieuwe AI vaker wint dan oude AI (met pokemon met geschikte moveset, eerst deze pokemon nieuwe AI en tegenstander oude AI, dan andersom)
-add pre-evolution moves (clefable) (only use fully evolved pokemon?)(check if Gengar is good)
+check battle results (clefable, gengar) (only use fully evolved pokemon?)
 Fairy type introduction seems standard in Pokemon API. Find out if this can be excluded or not
 
 

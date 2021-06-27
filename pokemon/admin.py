@@ -32,7 +32,7 @@ class PokemonAdmin(admin.ModelAdmin):
 class PokemonAdmin(admin.ModelAdmin):
     search_fields = ['species__name']
     autocomplete_fields = ['moves', 'ability', 'species']
-    list_display = ['species', 'win_percentage']
+    list_display = ['species', 'win_percentage', 'noteworthy', 'evolutions']
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
@@ -45,3 +45,10 @@ class PokemonAdmin(admin.ModelAdmin):
             return 0
         else:
             return round(wins / (wins+losses) * 100, 2)
+
+    def noteworthy(self, pokemon):
+        return ', '.join(str(m) for m in pokemon.moves.filter(is_noteworthy=True))
+
+    def evolutions(self, pokemon):
+        evolutions = Species.objects.filter(evolves_from=pokemon.species)
+        return ', '.join(str(s) for s in evolutions)

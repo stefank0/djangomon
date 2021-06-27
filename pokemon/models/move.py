@@ -15,6 +15,8 @@ class Move(models.Model):
     type = models.ForeignKey(Type, models.PROTECT)
     drain = models.IntegerField()
     recoil = models.IntegerField()
+    nerf_factor = models.FloatField(default=1.0)
+    is_noteworthy = models.BooleanField(default=False)
 
     class DamageClass(models.TextChoices):
         PHYSICAL = 'PH', 'Physical'
@@ -49,11 +51,9 @@ class Move(models.Model):
             attack_stat = attacker.special_attack
             defense_stat = defender.special_defense
         level_factor = (2 * attacker.level) // 5 + 2
-        nerf_factors = {
-            'hyper-beam': 0.5,
-            'future-sight': 0.5
-        }
-        power = round(self.power * nerf_factors.get(self.name, 1.0))
+        power = round(self.nerf_factor * self.power)
+        if power == 0:
+            return 0
         return (level_factor * power * attack_stat // defense_stat) // 50 + 2
 
     def max_damage(self, attacker, defender):
