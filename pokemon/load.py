@@ -2,7 +2,7 @@ import pokebase as pb
 from pokemon.models import Nature, Type, Species, Ability, Move, Pokemon
 
 
-def get_all(attr):
+def get_all(attr, max_id=None):
     """Generator: retrieve all objects of Pokemon API."""
     i = 1
     while True:
@@ -10,6 +10,8 @@ def get_all(attr):
             print(i)
             yield getattr(pb, attr)(i)
         except:
+            return
+        if max_id and i >= max_id:
             return
         i += 1
 
@@ -65,10 +67,9 @@ def _get_base_stat(stats, name):
 
 def load_species():
     """Load all species from Pokemon API into the our own DB."""
-    for pokemon in get_all('pokemon'):
+    max_id = 386    # up to 3rd gen only
+    for pokemon in get_all('pokemon', max_id=max_id):
         id_ = pokemon.id
-        if id_ > 386:
-            break  # up to 3rd gen only
         name = pokemon.name
         hp = _get_base_stat(pokemon.stats, 'hp')
         attack = _get_base_stat(pokemon.stats, 'attack')
@@ -93,7 +94,7 @@ def load_species():
             special_defense=special_defense,
             speed=speed
         )
-    for pokemon in get_all('pokemon'):
+    for pokemon in get_all('pokemon', max_id=max_id):
         evolves_from = pokemon.species.evolves_from_species
         if evolves_from:
             try:
@@ -166,8 +167,8 @@ def load_moves():
     """Load all moves from Pokemon API into our own DB."""
     for move in get_all('move'):
         power = move.power if move.power else 0
-        accuracy = move.accuracy if move.accuracy else 0
-        pp = move.pp if move.pp else 0
+        accuracy = move.accuracy if move.accuracy else 100
+        pp = move.pp if move.pp else 5
         type_ = Type.objects.get(name=move.type.name)
         damage_classes = {
             'physical': Move.DamageClass.PHYSICAL,

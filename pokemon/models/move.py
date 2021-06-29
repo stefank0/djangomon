@@ -54,7 +54,8 @@ class Move(models.Model):
         power = round(self.nerf_factor * self.power)
         if power == 0:
             return 0
-        return (level_factor * power * attack_stat // defense_stat) // 50 + 2
+        damage = (level_factor * power * attack_stat // defense_stat) // 50 + 2
+        return damage if damage > 0 else 1
 
     def max_damage(self, attacker, defender):
         """Maximum value of the damage."""
