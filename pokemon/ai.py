@@ -63,10 +63,17 @@ def select_move(pokemon, opponent):
     moves = _moves(pokemon, opponent)
     opponent_moves = _moves(opponent, pokemon)
     scores = [_score(pokemon, move, opponent, opponent_moves) for move in moves]
-    return max(
-        [move for move, score in zip(moves, scores) if score == max(scores)],
-        key=lambda move: move.expected_damage(pokemon, opponent)
-    )
+    best_moves = [move for move, score in zip(moves, scores) if score == max(scores)]
+    if max(scores) > 0.0:
+        recoils = [move.recoil for move in best_moves]
+        best_moves = [move for move in best_moves if move.recoil == min(recoils)]
+        drains = [move.drain for move in best_moves]
+        best_moves = [move for move in best_moves if move.drain == max(drains)]
+        priorities = [move.priority for move in best_moves]
+        best_moves = [move for move in best_moves if move.priority == max(priorities)]
+        accuracies = [move.accuracy for move in best_moves]
+        best_moves = [move for move in best_moves if move.accuracy == max(accuracies)]
+    return max(best_moves, key=lambda move: move.expected_damage(pokemon, opponent))
 
 
 def _add_probability(distr, damage, probability):

@@ -1,41 +1,5 @@
 Doel 1: inzicht te krijgen in welke Pokemon goed zijn (die geen items nodig hebben) afhankelijk van hun learnset (geen TMs, geen breeding, geen HMs)
 Doel 2: hetzelfde als hierboven maar dan met TMs en HMs
-Middel: Een battle simulator maken voor Pokemon / Pixelmon
-
-Conditions:
-1: IVs worden op gemiddeld gezet (0 tot 31 --> 15)
-2: EVs worden op random trainen gezet (5 statpoint = 20 EVs; in total 255)
-3: Natures (neutral)
-4: Op LVL 50
-5: Pokemon gedraagt zich als een gewone Pokemon speler; maximum dmg
-6: Priority moves implementeren (zoals een quick attack om de tegenstander uit te schakelen) en voorlopig geen status move
-    -For loop / looping over de priority moves om de tegenstander te killen
-    -Andere loop over alles om de move te kiezen voor max dmg
-7: Type modifier
-8: Hit chance (later inbrengen)
-    -In eerste instantie geen hit chance; alles raakt dus dat is makkelijker te implementeren
-    -In tweede instantie hit chance voor beide Pokemon (random number: raak of niet raak en dan het gevecht aantal keren runnen)
-9: AI kiest de attacks met meeste dmg (kijkt ook naar de type) en doet priority moves als ie de battle daarmee kan winnen
-
-Battleverloop:
-1: 10 gevechten per Pokemon (1 keuze tegen alle andere Pokemons)
-2: Iedere winst betekent 1 punt)
-3: Schaal is 0 tot 10 punten die een Pokemon kan scoren
-4: Wegschrijven naar een file / database waarbij de scores worden bijgehouden van een gevecht
-
-Turn 1
-1: Attack moves zijn duidelijk
-2: Dan de snelheid van beide Pokemon
-3: HP bijhouden
-
-Stappenplan:
-1: Als eerste type modifier:
-    -Same type modifier (1,5x)
-    -Different type modifier (1,0 of 0,5x afhankelijk van weakness of niet)
-
-
-
-
 
 
 2020-07-05
@@ -53,14 +17,14 @@ alleen 4 beste moves? (doe run met alles, kies de 4 meest gebruikte, run alles o
 
 
 NICK:
-testen schrijven voor ai, win_probability() (charmander met inferno tegen bulbasaur goede testcase) en battle() (win_probability testen: veel sterkere pokemon met 1.0 kans op winst, pokemon tegen zichzelf met 0.5 kans, spannender geval waarbij de langzamere pokemon een gegarandeerde 1 + 2HKO heeft.
+testen schrijven voor ai, win_probability() (charmander met inferno tegen bulbasaur goede testcase) en battle() (win_probability testen: veel sterkere pokemon met 1.0 kans op winst, pokemon tegen zichzelf met 0.5 kans, spannender geval waarbij de langzamere pokemon een gegarandeerde 0HKO of 2HKO heeft.
 
 STEFAN:
-haal vanuit de battle logs welke aanvallen vaak gebruikt worden, kijk of dit acceptabel is of dat moves onterecht overpowered zijn.
+tests voor recoil moves: bulbasaur vs rattata en bulbasaur vs butterfree
+tests voor ai: bulbasaur vs raichu (first slam, then thunderbolt, then quick-attack)
 test of nieuwe AI vaker wint dan oude AI (met pokemon met geschikte moveset, eerst deze pokemon nieuwe AI en tegenstander oude AI, dan andersom)
-check battle results (clefable, gengar) (only use fully evolved pokemon?)
+only use fully evolved pokemon?
 Fairy type introduction seems standard in Pokemon API. Find out if this can be excluded or not
-
 
 Test schrijven:
 bulbasaur vs ekans
@@ -71,45 +35,3 @@ HP left: bulbasaur (24) and ekans (53).
 ekans uses bite with 29 PH damage.
 HP left: ekans (53) and bulbasaur (0).
 ekans wins with 50.48% HP left.
-
-
-
-OPLOSSEN DOOR GEEN RECOIL MOVE TE KIEZEN BIJ GELIJKE KANSEN (bulbasaur vs butterfree goede testcase dat er als nodig toch nog wel recoil moves gekozen worden):
-bulbasaur vs rattata
-rattata uses double-edge with 90 PH damage.
-HP left: rattata (71) and bulbasaur (25).
-bulbasaur uses seed-bomb with 69 PH damage.
-HP left: bulbasaur (25) and rattata (2).
-rattata uses double-edge with 81 PH damage.
-HP left: rattata (0) and bulbasaur (0).
-rattata wins with 0.00% HP left.
-
-
-UITZOEKEN:
-bulbasaur vs pikachu
-pikachu uses slam with 38 PH damage.
-HP left: pikachu (105) and bulbasaur (77).
-bulbasaur uses double-edge with 54 PH damage.
-HP left: bulbasaur (60) and pikachu (51).
-pikachu uses slam with 38 PH damage.
-HP left: pikachu (51) and bulbasaur (22).
-bulbasaur uses double-edge with 56 PH damage.
-HP left: bulbasaur (6) and pikachu (0).
-bulbasaur wins with 5.22% HP left.
-
-VS
-
-bulbasaur vs raichu
-raichu uses thunderbolt with 36 SP damage.
-HP left: raichu (130) and bulbasaur (79).
-bulbasaur uses seed-bomb with 48 PH damage.
-HP left: bulbasaur (79) and raichu (82).
-raichu uses thunderbolt with 33 SP damage.
-HP left: raichu (82) and bulbasaur (46).
-bulbasaur uses seed-bomb with 42 PH damage.
-HP left: bulbasaur (46) and raichu (40).
-raichu uses thunderbolt with 33 SP damage.
-HP left: raichu (40) and bulbasaur (13).
-bulbasaur uses seed-bomb with 46 PH damage.
-HP left: bulbasaur (13) and raichu (0).
-bulbasaur wins with 11.30% HP left.

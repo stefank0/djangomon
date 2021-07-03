@@ -1,5 +1,7 @@
+from collections import Counter
+
 from django.contrib import admin
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from .models import Ability, Move, Nature, Pokemon, Species, Type, BattleLog
 
@@ -32,7 +34,7 @@ class PokemonAdmin(admin.ModelAdmin):
 class PokemonAdmin(admin.ModelAdmin):
     search_fields = ['species__name']
     autocomplete_fields = ['moves', 'ability', 'species']
-    list_display = ['species', 'win_percentage', 'noteworthy', 'evolutions']
+    list_display = ['species', 'win_percentage', 'noteworthy', 'evolutions', 'used_moves']
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
@@ -52,3 +54,9 @@ class PokemonAdmin(admin.ModelAdmin):
     def evolutions(self, pokemon):
         evolutions = Species.objects.filter(evolves_from=pokemon.species)
         return ', '.join(str(s) for s in evolutions)
+
+    def used_moves(self, pokemon):
+        moves = []
+        for log in BattleLog.objects.filter(Q(winner=pokemon) | Q(loser=pokemon)):
+            moves += [s.split(' ')[0] for s in log.report.split(f'{pokemon} uses ')[1:]]
+        return ', '.join(f'{move}: {count}' for move, count in Counter(moves).most_common())

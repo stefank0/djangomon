@@ -94,6 +94,11 @@ class Pokemon(models.Model):
         return (f'{self} uses {move} with {damage} {move.damage_class} damage.\n'
             f'HP left: {self} ({self.current_hp}) and {opponent} ({opponent.current_hp}).\n')
 
+    def _finish_battle(self, winner, loser, battle_report):
+        hp_left = (winner.current_hp / winner.hp) * 100.0
+        battle_report += f'{winner} wins with {hp_left:.2f}% HP left.\n'
+        return winner, battle_report
+
     def battle(self, opponent):
         """Battle with another Pokemon. The winner is returned."""
         battle_report = f'{self} vs {opponent}\n'
@@ -112,6 +117,6 @@ class Pokemon(models.Model):
             for attacker, move, defender in move_order:
                 battle_report += attacker.use_move(move, defender)
                 if defender.current_hp == 0:
-                    hp_left = (attacker.current_hp / attacker.hp) * 100.0
-                    battle_report += f'{attacker} wins with {hp_left:.2f}% HP left.\n'
-                    return attacker, battle_report
+                    return self._finish_battle(attacker, defender, battle_report)
+                elif attacker.current_hp == 0:
+                    return self._finish_battle(defender, attacker, battle_report)

@@ -113,7 +113,30 @@ def load_abilities():
 
 
 def _is_noteworthy(move):
-    if move.name in ['toxic-spikes', 'spikes', 'stealth-rock', 'sunny-day', 'rain-dance', 'sandstorm', 'hail']:
+    if move.name in [
+        'toxic-spikes',
+        'spikes',
+        'stealth-rock',
+        'sunny-day',
+        'rain-dance',
+        'rest',
+        'healing-wish',
+        'wish',
+        'heal-bell',
+        'aromatherapy',
+        'mirror-coat',
+        'counter',
+        'rapid-spin',
+        'defog',
+        'substitute',
+        'u-turn',
+        'volt-switch',
+        'baton-pass',
+        'shell-smash',
+        'hidden-power',
+        'protect',
+        'detect'
+    ]:
         return True
     accuracy = move.accuracy if move.accuracy else 100
     power = move.power if move.power else 0
@@ -239,6 +262,7 @@ def apply_corrections():
         'struggle': 0.2,
         'last-resort': 0.33,
         'dream-eater': 0.33,
+        'synchronoise': 0.33,
         'focus-punch': 0.33,
         'skull-bash': 0.5,
         'sky-attack': 0.5,
