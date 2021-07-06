@@ -1,4 +1,4 @@
-from math import isclose
+from math import isclose, ceil
 
 
 def select_move_naive(pokemon, opponent):
@@ -40,7 +40,7 @@ def _moves(pokemon, opponent):
     """
     benchmark_move = _benchmark_move(pokemon, opponent)
     partitions = {}
-    for move in pokemon.moves.all():
+    for move in pokemon.moves.filter(power__gt=0, nerf_factor__gt=0.0):
         if _is_useful(pokemon, opponent, move, benchmark_move):
             key = (move.priority, move.accuracy, move.drain, move.recoil)
             partitions.setdefault(key, []).append(move)
@@ -67,10 +67,18 @@ def select_move(pokemon, opponent):
     if max(scores) > 0.0:
         recoils = [move.recoil for move in best_moves]
         best_moves = [move for move in best_moves if move.recoil == min(recoils)]
-        drains = [move.drain for move in best_moves]
-        best_moves = [move for move in best_moves if move.drain == max(drains)]
+        expected_turns = [
+            ceil(opponent.current_hp / move.expected_damage(pokemon, opponent))
+            for move in best_moves
+        ]
+        best_moves = [
+            move for move, turns in zip(best_moves, expected_turns)
+            if turns == min(expected_turns)
+        ]
         priorities = [move.priority for move in best_moves]
         best_moves = [move for move in best_moves if move.priority == max(priorities)]
+        drains = [move.drain for move in best_moves]
+        best_moves = [move for move in best_moves if move.drain == max(drains)]
         accuracies = [move.accuracy for move in best_moves]
         best_moves = [move for move in best_moves if move.accuracy == max(accuracies)]
     return max(best_moves, key=lambda move: move.expected_damage(pokemon, opponent))

@@ -259,11 +259,13 @@ def apply_corrections():
         move.recoil = 10000  # Probably kills the Pokemon using the move.
         move.save()
     nerf_factors = {
+        'dream-eater': 0.0,
+        'fake-out': 0.0,
+        'synchronoise': 0.0,
+        'focus-punch': 0.0,
         'struggle': 0.2,
         'last-resort': 0.33,
-        'dream-eater': 0.33,
-        'synchronoise': 0.33,
-        'focus-punch': 0.33,
+        'future-sight': 0.5,
         'skull-bash': 0.5,
         'sky-attack': 0.5,
         'solar-beam': 0.5,
@@ -275,7 +277,6 @@ def apply_corrections():
         'roar-of-time': 0.66,
         'giga-impact': 0.66,
         'hyper-beam': 0.66,
-        'future-sight': 0.66,
         'water-spout': 0.75,
         'eruption': 0.75,
         'overheat': 0.75,
