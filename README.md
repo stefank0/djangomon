@@ -1,3 +1,7 @@
+# Djangomon
+The most interesting part of this project is the AI that selects the moves. It probably outperforms a human in evaluating the combinations of power, accuracy, priority and recoil damage, by computing probability distributions.
+For example, for a Raichu against a Bulbasaur, it could select slam, then thunderbolt, then quick attack, to have the highest probability of winning within 3 turns.
+
 # Getting started
 
 * -- install Python (3.8) and Git -- 
