@@ -9,9 +9,13 @@ def select_move_naive(pokemon, opponent):
     )
 
 
+def _usable_moves(pokemon):
+    return pokemon.moves.filter(power__gt=0, nerf_factor__gt=0.0)
+
+
 def _benchmark_move(pokemon, opponent):
     """Basic move to compare other moves with."""
-    moves = pokemon.moves.filter(priority=0, accuracy=100, drain=0, recoil=0)
+    moves = _usable_moves(pokemon).filter(priority=0, accuracy=100, drain=0, recoil=0)
     if moves:
         return max(moves, key=lambda move: move.max_damage(pokemon, opponent))
     else:
@@ -40,7 +44,7 @@ def _moves(pokemon, opponent):
     """
     benchmark_move = _benchmark_move(pokemon, opponent)
     partitions = {}
-    for move in pokemon.moves.filter(power__gt=0, nerf_factor__gt=0.0):
+    for move in _usable_moves(pokemon):
         if _is_useful(pokemon, opponent, move, benchmark_move):
             key = (move.priority, move.accuracy, move.drain, move.recoil)
             partitions.setdefault(key, []).append(move)
