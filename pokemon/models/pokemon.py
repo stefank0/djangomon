@@ -16,6 +16,7 @@ class Pokemon(models.Model):
     nature = models.ForeignKey(Nature, models.PROTECT)
     ability = models.ForeignKey(Ability, models.PROTECT)
     moves = models.ManyToManyField(Move)
+    cache = models.JSONField(default=dict, blank=True)
 
     # IV's
     iv_hp = models.IntegerField(default=15)
