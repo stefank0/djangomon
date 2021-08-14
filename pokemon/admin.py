@@ -1,7 +1,7 @@
 from collections import Counter
 
 from django.contrib import admin
-from django.db.models import Count, Q
+from django.db.models import Q
 
 from .models import Ability, Move, Nature, Pokemon, Species, Type, BattleLog
 
@@ -30,6 +30,21 @@ class SpeciesAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 
+class TypeFilter(admin.SimpleListFilter):
+    title = 'type'
+    parameter_name = 'type'
+
+    def lookups(self, request, model_admin):
+        return [(t.name, t.name) for t in Type.objects.order_by('name')]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value:
+            return queryset.filter(
+                Q(species__type1__name=value) | Q(species__type2__name=value)
+            )
+
+
 @admin.register(Pokemon)
 class PokemonAdmin(admin.ModelAdmin):
     search_fields = ['species__name']
@@ -37,6 +52,7 @@ class PokemonAdmin(admin.ModelAdmin):
     exclude = ['cache']
     list_display = ['species', 'win_percentage', 'noteworthy', 'evolutions', 'used_moves']
     list_select_related = ['species']
+    list_filter = [TypeFilter]
 
     def get_queryset(self, request):
         return super().get_queryset(request).order_by('-cache__win_percentage')
