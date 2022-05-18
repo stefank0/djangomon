@@ -2,6 +2,7 @@ from collections import Counter
 
 from django.contrib import admin
 from django.db.models import Q
+from django.utils.html import format_html
 
 from .models import Ability, Move, Nature, Pokemon, Species, Type, BattleLog
 
@@ -50,7 +51,7 @@ class PokemonAdmin(admin.ModelAdmin):
     search_fields = ['species__name']
     autocomplete_fields = ['moves', 'ability', 'species']
     exclude = ['cache']
-    list_display = ['species', 'win_percentage', 'noteworthy', 'evolutions', 'used_moves']
+    list_display = ['species', 'serebii', 'win_percentage', 'noteworthy', 'evolutions', 'used_moves', 'attacker', 'defender']
     list_select_related = ['species']
     list_filter = [TypeFilter]
 
@@ -96,3 +97,27 @@ class PokemonAdmin(admin.ModelAdmin):
 
     def used_moves(self, pokemon):
         return self._get_cached(pokemon, 'used_moves')
+
+    def attacker(self, pokemon):
+        attack = pokemon.species.attack
+        special_attack = pokemon.species.special_attack
+        if attack > 1.5 * special_attack:
+            return 'physical'
+        elif special_attack > 1.5 * attack:
+            return 'special'
+        else:
+            return ''
+
+    def defender(self, pokemon):
+        defense = pokemon.species.defense
+        special_defense = pokemon.species.special_defense
+        if defense > 1.5 * special_defense:
+            return 'physical'
+        elif special_defense > 1.5 * defense:
+            return 'special'
+        else:
+            return ''
+
+    def serebii(self, pokemon):
+        url = f'https://www.serebii.net/pokedex-bw/{pokemon.species.id}.shtml'
+        return format_html('<a href="{}">&raquo;&raquo;</a>', url)
